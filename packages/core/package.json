@@ -1,0 +1,21 @@
+{
+  "name": "@repoforge/core",
+  "version": "0.1.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@repoforge/shared": "workspace:*",
+    "@repoforge/detectors": "workspace:*",
+    "fast-glob": "^3.3.3"
+  }
+}
