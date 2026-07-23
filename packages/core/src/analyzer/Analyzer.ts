@@ -12,16 +12,25 @@ export class Analyzer {
     ) { }
 
     async analyze(
-        path: string
+        path: string,
+        options?: {
+            compat?: boolean;
+            multiStage?: boolean;
+            useCorepack?: boolean;
+        }
     ): Promise<ProjectModel> {
-
         const context = await this.scanner.scan(path);
         const model: ProjectModel = {
             technologies: [],
             packageManagers: [],
             scripts: {},
             commands: {},
-            dependencies: { production: {}, development: {} }
+            dependencies: { production: {}, development: {} },
+            runtime: {
+                name: "",
+                version: ""
+            },
+            options
         };
 
         await this.bootsTrapEngine.run(context, model);

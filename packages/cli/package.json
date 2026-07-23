@@ -1,13 +1,26 @@
 {
   "name": "@repoforge/cli",
   "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "description": "RepoForge CLI tool for automatic Docker containerization",
+  "main": "./dist/index.js",
+  "bin": {
+    "repoforge": "./dist/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@repoforge/core": "workspace:*",
+    "@repoforge/detectors": "workspace:*",
+    "@repoforge/generators": "workspace:*",
+    "@repoforge/runner": "workspace:*",
+    "@repoforge/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
+  }
 }
