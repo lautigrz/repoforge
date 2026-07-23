@@ -1,8 +1,8 @@
 import type { Detector, ProjectContext, ProjectModel } from "@repoforge/shared";
 import { PackageJsonReader } from "./readers/PackageJsonReader.js";
 
-export class PnpmDetector implements Detector {
-    readonly name = "pnpm";
+export class YarnDetector implements Detector {
+    readonly name = "yarn";
 
     constructor(private readonly packageJsonReader?: PackageJsonReader) {}
 
@@ -10,14 +10,14 @@ export class PnpmDetector implements Detector {
         context: ProjectContext,
         model: ProjectModel
     ): Promise<void> {
-        const hasLockFile = context.fileExists("pnpm-lock.yaml") || context.fileExists("pnpm-workspace.yaml");
+        const hasLockFile = context.fileExists("yarn.lock");
         const packageJson = this.packageJsonReader ? await this.packageJsonReader.read(context) : null;
-
         const pmField = packageJson?.packageManager;
+
         let version: string | undefined;
         let useCorepack = false;
 
-        if (pmField && pmField.startsWith("pnpm")) {
+        if (pmField && pmField.startsWith("yarn")) {
             const parts = pmField.split("@");
             if (parts.length > 1) {
                 version = parts[1];
@@ -25,15 +25,15 @@ export class PnpmDetector implements Detector {
             }
         }
 
-        if (!hasLockFile && !version && !pmField?.startsWith("pnpm")) {
+        if (!hasLockFile && !version && !pmField?.startsWith("yarn")) {
             return;
         }
 
         model.packageManagers.push({
-            name: "pnpm",
+            name: "yarn",
             ecosystem: "node",
-            lockFile: context.fileExists("pnpm-lock.yaml") ? "pnpm-lock.yaml" : undefined,
-            version: version ?? "10",
+            lockFile: hasLockFile ? "yarn.lock" : undefined,
+            version: version ?? "1.22.22",
             useCorepack: useCorepack || Boolean(version),
             packageManagerField: pmField
         });

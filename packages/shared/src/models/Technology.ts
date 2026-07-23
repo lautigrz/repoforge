@@ -1,10 +1,12 @@
 export type TechnologyCategory =
     | "language"
     | "framework"
+    | "orm"
     | "database"
     | "service"
     | "tool"
-    | "runtime";
+    | "runtime"
+    | "testing";
 
 
 export interface Technology {
@@ -16,5 +18,7 @@ export interface Technology {
     confidence: number;
 
     evidence: string[];
+
+    metadata?: Record<string, unknown>;
 
 }

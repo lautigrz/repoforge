@@ -3,42 +3,35 @@ import type {
     ProjectContext,
     ProjectModel
 } from "@repoforge/shared";
+import { PackageJsonReader } from "./readers/PackageJsonReader.js";
 
 
 export class PackageJsonDetector implements Detector {
 
     readonly name = "package-json";
 
+    constructor(private readonly packageJsonReader: PackageJsonReader) {
+    }
 
     async detect(
         context: ProjectContext,
         model: ProjectModel
     ): Promise<void> {
 
+        const packageJson = await this.packageJsonReader.read(context);
 
-        if (!context.fileExists("package.json")) {
-            return;
-        }
-        const content = await context.readFile(
-            "package.json"
-        );
-
-
-        if (!content) {
+        if (!packageJson) {
             return;
         }
 
+        model.scripts =
+            await this.packageJsonReader.getScripts(context);
 
-        const packageJson = JSON.parse(content);
+        model.dependencies.production =
+            packageJson.dependencies ?? {};
 
-
-        model.scripts = packageJson.scripts ?? {};
-
-
-        model.dependencies.production = packageJson.dependencies ?? {}
-
-
-        model.dependencies.development = packageJson.devDependencies ?? {}
+        model.dependencies.development =
+            packageJson.devDependencies ?? {};
 
     }
 }

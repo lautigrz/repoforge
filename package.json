@@ -11,14 +11,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.15.1",
-      "onFail": "download"
-    }
-  },
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.15.1",
   "devDependencies": {
     "@types/node": "^26.1.1",
     "eslint": "^10.7.0",
