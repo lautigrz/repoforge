@@ -14,6 +14,7 @@ import {
 import { ExpressDetector } from "../ecosystems/node/frameworks/ExpressDetector.js";
 import { OrmDetector } from "../ecosystems/node/technologies/OrmDetector.js";
 import { PrismaDetector } from "../ecosystems/node/technologies/PrismaDetector.js";
+import { DatabaseDetector } from "../ecosystems/node/technologies/DatabaseDetector.js";
 import { PackageJsonReader } from "../ecosystems/node/readers/PackageJsonReader.js";
 
 export class NodeEcosystemProvider implements EcosystemProvider {
@@ -35,6 +36,7 @@ export class NodeEcosystemProvider implements EcosystemProvider {
             new ExpressDetector(this.packageJsonReader),
             new OrmDetector(this.packageJsonReader),
             new PrismaDetector(this.packageJsonReader),
+            new DatabaseDetector(this.packageJsonReader),
             new MonorepoDetector(this.packageJsonReader),
             new DockerExistingDetector(),
             new CommandDetector(),

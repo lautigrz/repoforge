@@ -1,3 +1,5 @@
+import type { InfrastructureService } from "./InfrastructureService.js";
+import type { MigrationConfig } from "./MigrationConfig.js";
 import type { PackageManager } from "./PackageManager.js";
 import type { Technology } from "./Technology.js";
 
@@ -23,7 +25,7 @@ export interface ProjectModel {
 
     monorepo?: {
         isMonorepo: boolean;
-        tool?: string; // Agnostic: "pnpm", "maven", "gradle", "turbo", "nx", etc.
+        tool?: string;
         workspaceFile?: string;
         apps?: string[];
         packages?: string[];
@@ -37,6 +39,16 @@ export interface ProjectModel {
         dockerfilePath?: string;
         dockerComposePath?: string;
     };
+
+    /**
+     * Infrastructure services detected for the project (Databases, Caches, Queues, Search Engines, etc.)
+     */
+    services?: InfrastructureService[];
+
+    /**
+     * Migration configuration for the database / persistence layer
+     */
+    migrations?: MigrationConfig;
 
     /**
      * Generic ORM / Persistence metadata (Prisma, TypeORM, Hibernate, Drizzle, Entity Framework, etc.)

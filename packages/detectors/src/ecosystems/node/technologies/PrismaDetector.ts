@@ -31,6 +31,24 @@ export class PrismaDetector implements Detector {
                 schemaPath
             };
 
+            if (schemaPath) {
+                const hasMigrationsDir = context.fileExists("prisma/migrations");
+                const pm = model.packageManagers[0]?.name ?? "npm";
+                const action = hasMigrationsDir ? "migrate deploy" : "db push";
+
+                const migCmd = pm === "pnpm"
+                    ? `pnpm exec prisma ${action}`
+                    : pm === "yarn"
+                    ? `yarn prisma ${action}`
+                    : `npx prisma ${action}`;
+
+                model.migrations = {
+                    hasMigrations: true,
+                    tool: "prisma",
+                    command: migCmd
+                };
+            }
+
             const exists = model.technologies.some(t => t.name === "Prisma");
             if (!exists) {
                 model.technologies.push({

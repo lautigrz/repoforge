@@ -39,13 +39,29 @@ export class DockerErrorAnalyzer {
         }
 
         // 4. Port in use
-        if (rawOutput.includes("EADDRINUSE") || rawOutput.includes("address already in use")) {
+        if (
+            rawOutput.includes("EADDRINUSE") ||
+            rawOutput.includes("address already in use") ||
+            rawOutput.includes("port is already allocated") ||
+            rawOutput.includes("Bind for 0.0.0.0")
+        ) {
             errors.push({
                 title: "Port Already In Use",
-                cause: "The container port is already bound by another running process.",
-                suggestedFix: "Specify a different port using --port <number> or kill the process occupying the port.",
+                cause: "The target host port is already bound by another running process or container.",
+                suggestedFix: "Stop existing containers using 'docker stop' or specify a different port.",
                 rawError: rawOutput,
                 patternId: "PORT_IN_USE"
+            });
+        }
+
+        // 5. TypeScript / tsconfig syntax error
+        if (rawOutput.includes("tsconfig.json") && (rawOutput.includes("TS1005") || rawOutput.includes("TS1136") || rawOutput.includes("error TS"))) {
+            errors.push({
+                title: "TypeScript / tsconfig.json Compilation Error",
+                cause: "The project's tsconfig.json file is malformed JSON or contains invalid syntax.",
+                suggestedFix: "Ensure 'tsconfig.json' contains valid JSON with valid 'compilerOptions'.",
+                rawError: rawOutput,
+                patternId: "INVALID_TSCONFIG"
             });
         }
 

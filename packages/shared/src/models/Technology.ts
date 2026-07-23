@@ -3,6 +3,7 @@ export type TechnologyCategory =
     | "framework"
     | "orm"
     | "database"
+    | "cache"
     | "service"
     | "tool"
     | "runtime"

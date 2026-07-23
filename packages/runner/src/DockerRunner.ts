@@ -1,5 +1,5 @@
 import type { ProjectModel, Runner } from "@repoforge/shared";
-import { DockerIgnoreGenerator } from "@repoforge/generators";
+import { DockerComposeGenerator, DockerIgnoreGenerator } from "@repoforge/generators";
 import { spawn } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -62,37 +62,73 @@ export class DockerRunner implements Runner {
     ): Promise<string> {
         const dockerPath = toDockerPath(projectPath);
         const startTime = Date.now();
+        const hasServices = Boolean(model?.services && model.services.length > 0);
 
-        console.log(`\n🔨 Building Docker image "${imageName}"...`);
+        if (hasServices && model) {
+            console.log(`\n📦 Infrastructure services detected: ${model.services!.map(s => s.name).join(", ")}.`);
+            console.log(`🛠️ Generating and writing docker-compose.yml...`);
+            const composeGen = new DockerComposeGenerator();
+            const composeContent = composeGen.generate(model);
+            await this.writeDockerCompose(projectPath, composeContent);
 
-        try {
-            await runDockerCommandWithCapturedOutput([
-                "docker", "build",
-                "-t", imageName,
-                dockerPath
-            ]);
-        } catch (err: any) {
-            const rawOutput = err.message || "";
-            const diag = this.errorAnalyzer.analyze(rawOutput);
-            console.error(this.errorAnalyzer.formatDiagnostic(diag));
-            throw err;
-        }
+            console.log(`\n🚀 Launching entire environment with Docker Compose...`);
+            const composeFilePath = `${dockerPath}/docker-compose.yml`;
 
-        console.log(`\n🚀 Running container on port ${port}...`);
+            try {
+                await runDockerCommandWithCapturedOutput([
+                    "docker", "compose",
+                    "-f", composeFilePath,
+                    "up", "-d", "--build", "--remove-orphans"
+                ]);
+            } catch (err: any) {
+                const rawOutput = err.message || "";
+                const diag = this.errorAnalyzer.analyze(rawOutput);
+                console.error(this.errorAnalyzer.formatDiagnostic(diag));
+                throw err;
+            }
+        } else {
+            console.log(`\n🔨 Building Docker image "${imageName}"...`);
 
-        try {
-            await runDockerCommandWithCapturedOutput([
-                "docker", "run",
-                "-d",
-                "-p", `${port}:${port}`,
-                "-e", `PORT=${port}`,
-                imageName
-            ]);
-        } catch (err: any) {
-            const rawOutput = err.message || "";
-            const diag = this.errorAnalyzer.analyze(rawOutput);
-            console.error(this.errorAnalyzer.formatDiagnostic(diag));
-            throw err;
+            try {
+                await runDockerCommandWithCapturedOutput([
+                    "docker", "build",
+                    "-t", imageName,
+                    dockerPath
+                ]);
+            } catch (err: any) {
+                const rawOutput = err.message || "";
+                const diag = this.errorAnalyzer.analyze(rawOutput);
+                console.error(this.errorAnalyzer.formatDiagnostic(diag));
+                throw err;
+            }
+
+            const containerName = imageName;
+            console.log(`\n🧹 Cleaning up any previous container "${containerName}"...`);
+            try {
+                await runDockerCommandWithCapturedOutput([
+                    "docker", "rm", "-f", containerName
+                ]);
+            } catch {
+                // Ignore if container does not exist
+            }
+
+            console.log(`\n🚀 Running container on port ${port}...`);
+
+            try {
+                await runDockerCommandWithCapturedOutput([
+                    "docker", "run",
+                    "-d",
+                    "--name", containerName,
+                    "-p", `${port}:${port}`,
+                    "-e", `PORT=${port}`,
+                    imageName
+                ]);
+            } catch (err: any) {
+                const rawOutput = err.message || "";
+                const diag = this.errorAnalyzer.analyze(rawOutput);
+                console.error(this.errorAnalyzer.formatDiagnostic(diag));
+                throw err;
+            }
         }
 
         const url = `http://localhost:${port}`;
@@ -125,5 +161,14 @@ export class DockerRunner implements Runner {
 
         console.log(`\n📄 Dockerfile written to ${dockerfilePath}`);
         console.log(`📄 .dockerignore written to ${dockerignorePath}`);
+    }
+
+    async writeDockerCompose(
+        projectPath: string,
+        content: string
+    ): Promise<void> {
+        const composePath = path.join(projectPath, "docker-compose.yml");
+        await writeFile(composePath, content, "utf-8");
+        console.log(`\n📄 docker-compose.yml written to ${composePath}`);
     }
 }

@@ -7,7 +7,7 @@ import {
     NodeEcosystemProvider,
     PackageJsonReader
 } from "@repoforge/detectors";
-import { DockerfileGenerator } from "@repoforge/generators";
+import { DockerfileGenerator, DockerComposeGenerator } from "@repoforge/generators";
 import path from "node:path";
 import process from "node:process";
 
@@ -55,6 +55,13 @@ async function runTest() {
 
     console.log("\n=== Generated Dockerfile ===");
     console.log(dockerFile);
+
+    if (model.services && model.services.length > 0) {
+        const composeGen = new DockerComposeGenerator();
+        const composeFile = composeGen.generate(model);
+        console.log("\n=== Generated docker-compose.yml ===");
+        console.log(composeFile);
+    }
 
     const runner = new DockerRunner();
 

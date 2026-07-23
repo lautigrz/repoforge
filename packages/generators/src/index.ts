@@ -7,3 +7,4 @@ export * from "./dockerfile/strategies/PackageManagerStrategy.js";
 export * from "./dockerfile/strategies/PrismaStrategy.js";
 export * from "./dockerfile/strategies/FrameworkStrategy.js";
 export * from "./dockerfile/strategies/CompatModeStrategy.js";
+export * from "./dockercompose/DockerComposeGenerator.js";

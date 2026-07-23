@@ -1,6 +1,8 @@
 export * from "./models/ProjectContext.js";
 export * from "./models/ProjectModel.js";
 export * from "./models/Technology.js";
+export * from "./models/InfrastructureService.js";
+export * from "./models/MigrationConfig.js";
 
 export * from "./interfaces/Detector.js";
 export * from "./interfaces/Scanner.js";
